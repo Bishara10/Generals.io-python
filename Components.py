@@ -32,6 +32,15 @@ class Tile():
         """Set number of soldiers in tile currently"""
         self.soldiers = soldiers
     
+    def __eq__(self, other):
+        if isinstance(other, Tile):
+            return self.pos == other.pos
+
+        elif isinstance(other, tuple):
+            return self.pos == other
+        
+        return NotImplemented
+        
 
 class Outpost(Tile):
     def __init__(self, pos):
