@@ -16,13 +16,15 @@ class Player(Sprite_Object):
         self.tiles = set()
 
 
-    def move(self, src_tile: "Tile", dest_tile: "Tile"):
+    def move(self, src_tile: "Tile", dest_tile: "Tile") -> bool:
         """Move army from a tile to another tile"""
         # Player should have more than 1 soldier in the source tile to move
         if src_tile.soldiers > 1:
             # Cost of move = 1 soldier
             # 1 soldier stays in the souce tile, the rest move to the destination
-            dest_tile.soldiers = src_tile - 1 - dest_tile.soldiers
+            # friendly_tile helps to know if the destination tile is friendly or not to not kill own soldiers.
+            friendly_tile: bool = dest_tile.player == self if dest_tile.player else False
+            dest_tile.soldiers = src_tile.soldiers - 1 + (friendly_tile * dest_tile.soldiers)
             src_tile.soldiers = 1
 
             if dest_tile.soldiers < 0:
@@ -35,6 +37,11 @@ class Player(Sprite_Object):
                 # Otherwise, this player conquers the tile even if the subtraction
                 # result is 0.
                 dest_tile.player = self
+                # self.tiles.add(dest_tile)
+            
+            return True
+        
+        return False
 
 
 class Mountain(Sprite_Object):
@@ -57,7 +64,13 @@ class Tile():
             return self.pos == other
         
         return NotImplemented
-        
+    
+    def __str__(self):
+        return f"Tile at {self.pos}, with {self.soldiers} soldiers of {self.player}"
+
+    
+    def __hash__(self):
+        return hash(self.pos)
 
 class Outpost(Tile):
     def __init__(self, pos):
