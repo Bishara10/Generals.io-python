@@ -9,8 +9,32 @@ class Sprite_Object(pygame.sprite.Sprite):
 
 
 class Player(Sprite_Object):
-    def __init__(self, image: pygame.image, pos):
+    def __init__(self, image: pygame.image, pos, color):
         super().__init__(image, pos)
+        self.base = pos
+        self.color = color
+        self.tiles = set()
+
+
+    def move(self, src_tile: "Tile", dest_tile: "Tile"):
+        """Move army from a tile to another tile"""
+        # Player should have more than 1 soldier in the source tile to move
+        if src_tile.soldiers > 1:
+            # Cost of move = 1 soldier
+            # 1 soldier stays in the souce tile, the rest move to the destination
+            dest_tile.soldiers = src_tile - 1 - dest_tile.soldiers
+            src_tile.soldiers = 1
+
+            if dest_tile.soldiers < 0:
+                # If the subtraction is negative, that means this player failed
+                # to defeat the other player in the destination tile. The destination
+                # Tile stays with the enemy player.
+                dest_tile.soldiers *= -1
+            
+            else:
+                # Otherwise, this player conquers the tile even if the subtraction
+                # result is 0.
+                dest_tile.player = self
 
 
 class Mountain(Sprite_Object):
@@ -21,16 +45,9 @@ class Mountain(Sprite_Object):
 class Tile():
     def __init__(self, pos):
         self.pos = pos
-        self.soldiers = 0
-        self.player = None
-    
-    def conquer(self, player):
-        """Set player that conquered this tile"""
-        self.player = player
-    
-    def set_soldiers(self, soldiers):
-        """Set number of soldiers in tile currently"""
-        self.soldiers = soldiers
+        self.soldiers: int = 0
+        self.player: Player = None
+
     
     def __eq__(self, other):
         if isinstance(other, Tile):
