@@ -62,6 +62,13 @@ def handle_input(event, current_tile_pos):
 
     return tile_to_chose.pos if tile_to_chose != None else current_tile_pos
 
+
+def highlight_tile(tile_pos: tuple):
+    draw_grid()
+    highlight_pos = (tile_pos[0]+1, tile_pos[1]+1)
+    pygame.draw.rect(screen, (200, 200, 200), (*highlight_pos, TILE_SIZE, TILE_SIZE), 1)
+
+
 # Players
 player1 = Player(base_image, get_random_location(available_positions), "#2792FF")
 tiles = {}
@@ -105,9 +112,7 @@ def main():
             curr_chosen_tile_pos = handle_input(event, curr_chosen_tile_pos)
             if prev_chosen_tile_pos != curr_chosen_tile_pos and curr_chosen_tile_pos != player1.base:
                 draw_tiles([curr_chosen_tile_pos])
-                draw_grid()
-                highlight_pos = (curr_chosen_tile_pos[0]+1, curr_chosen_tile_pos[1]+1)
-                pygame.draw.rect(screen, (200, 200, 200), (*highlight_pos, TILE_SIZE, TILE_SIZE), 1)
+                highlight_tile(curr_chosen_tile_pos)
             
             else:
                 curr_chosen_tile_pos = prev_chosen_tile_pos
