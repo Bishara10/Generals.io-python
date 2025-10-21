@@ -9,6 +9,7 @@ pygame.display.set_caption("Generals")
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 screen.fill("#DCDCDC")
 clock = pygame.time.Clock()
+pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
 
 inputs = {pygame.K_UP: (0, -TILE_SIZE), 
           pygame.K_DOWN: (0, TILE_SIZE),
@@ -17,10 +18,10 @@ inputs = {pygame.K_UP: (0, -TILE_SIZE),
         }
 
 # Load sprites
-mountain_image = pygame.image.load("assets/mountain.png").convert_alpha()
-mountain_image = pygame.transform.scale(mountain_image, (TILE_SIZE, TILE_SIZE))
-base_image = pygame.image.load("assets/base.png").convert_alpha()
-base_image = pygame.transform.scale(base_image, (TILE_SIZE, TILE_SIZE))
+mountain_sprite = pygame.image.load("assets/images/mountain.png").convert_alpha()
+mountain_sprite = pygame.transform.scale(mountain_sprite, (TILE_SIZE, TILE_SIZE))
+base_sprite = pygame.image.load("assets/images/crown.png").convert_alpha()
+base_sprite = pygame.transform.scale(base_sprite, (TILE_SIZE, TILE_SIZE))
 
 
 # Mountains
@@ -31,7 +32,10 @@ for _ in range(70):
 
     if pos not in mountains_positions:
         mountains_positions.add(pos)
-        mountains_sprites.add(Mountain(mountain_image, pos))
+        mountains_sprites.add(Mountain(mountain_sprite, pos))
+
+
+
 
 # Available positions are all tiles in the grid that are not mountains.
 available_positions = set([(x//TILE_SIZE * TILE_SIZE, y // TILE_SIZE * TILE_SIZE) 
@@ -71,10 +75,12 @@ def highlight_tile(tile_pos: tuple):
     pygame.draw.rect(screen, (220, 220, 220), (*highlight_pos, TILE_SIZE, TILE_SIZE), 2)
 
 
-player1 = Player(base_image, get_random_location(available_positions), "#2792FF")
+player1 = Player(base_sprite, get_random_location(available_positions), "#2792FF")
 
 # Draw mountains and grid
-mountains_sprites.draw(screen) 
+
+for spr in mountains_sprites:
+    spr.draw(screen)
 player1.draw_tiles(screen)
 draw_grid()
 available_tiles[player1.base].player = player1
@@ -82,9 +88,6 @@ available_tiles[player1.base].soldiers = 1
 player1.tiles[player1.base] = available_tiles[player1.base]
 screen.blit(player1.image, player1.rect)
 
-
-# text_surface = font.render(str("tst"), True, (255, 255, 255))
-# text_surface_rect = text_surface.get_rect(center=(player1.rect[0]+ TILE_SIZE // 2, player1.rect[1] + TILE_SIZE // 2))
 
 def main():
     curr_chosen_tile_pos = player1.base

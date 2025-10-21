@@ -2,7 +2,7 @@ import pygame
 from constants import *
 
 pygame.font.init()
-def_font = pygame.font.SysFont('Consolas', 18)
+def_font = pygame.font.Font('./assets/fonts/Quicksand-Light.ttf', 20)
 
 class Sprite_Object(pygame.sprite.Sprite):
     def __init__(self, image: pygame.image, pos):
@@ -101,6 +101,11 @@ class Player(Sprite_Object):
 class Mountain(Sprite_Object):
     def __init__(self, image: pygame.image, pos):
         super().__init__(image, pos)
+        
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, "#BBBBBB", (*self.rect.topleft, TILE_SIZE, TILE_SIZE))
+        surface.blit(self.image, self.rect)
 
 
 class Tile():
