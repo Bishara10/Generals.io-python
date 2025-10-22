@@ -59,6 +59,7 @@ class Player(Sprite_Object):
         self.color = color
         self.base = pos
         self.tiles: dict[tuple: "Tile"] = {}
+        self.outposts: dict[tuple: "Outpost"] = {}
 
 
     def move(self, src_tile: "Tile", dest_tile: "Tile") -> bool:
@@ -68,7 +69,7 @@ class Player(Sprite_Object):
             # Cost of move = 1 soldier
             # 1 soldier stays in the souce tile, the rest move to the destination
             # friendly_tile helps to know if the destination tile is friendly or not to not kill own soldiers.
-            friendly_tile: bool = dest_tile.player == self if dest_tile.player else False
+            friendly_tile: bool = dest_tile.player == self if dest_tile.player else -1
             dest_tile.soldiers = src_tile.soldiers - 1 + (friendly_tile * dest_tile.soldiers)
             src_tile.soldiers = 1
 
@@ -83,15 +84,24 @@ class Player(Sprite_Object):
                 # result is 0.
                 dest_tile.player = self
                 self.tiles[dest_tile.pos] = dest_tile
+                if isinstance(dest_tile, Outpost):
+                    self.outposts[dest_tile.pos] = dest_tile
             
             return True
         
         return False
     
+
     def draw_tiles(self, surface):
         for tile in self.tiles.values():
             tile.draw(surface)
     
+    def regenerate_bases(self):
+        """Spawns a soldier in the player's base and outposts"""
+        self.tiles[self.base].soldiers += 1
+        for outpost in self.outposts.values():
+            outpost.soldiers += 1
+
 
     def regenerate_all(self):
         for tile in self.tiles.values():
@@ -116,6 +126,7 @@ class Tile():
         self.player: Player = None
         label_position = (self.pos[0] + TILE_SIZE // 2, self.pos[1] + TILE_SIZE // 2)
         self.label = Label("", label_position)
+        self.default_tile_color = "#DCDCDC"
 
     def __eq__(self, other):
         if isinstance(other, Tile):
@@ -130,22 +141,46 @@ class Tile():
     def __hash__(self):
         return hash(self.pos)
 
+    def _draw_player_tile(self, screen, topleft):
+        pygame.draw.rect(screen, self.player.color, (*topleft, TILE_BODY_SIZE, TILE_BODY_SIZE))
+        screen.blit(self.player.image, self.player.base)
+        self.label.set_text(str(self.soldiers) if self.soldiers > 0 else "")
+        self.label.draw(screen)
+
+    def _draw_non_player_tile(self, screen, topleft):
+        pygame.draw.rect(screen, self.default_tile_color, (*topleft, TILE_BODY_SIZE, TILE_BODY_SIZE))
+
     def draw(self, screen: pygame.surface.Surface):
         topleft = (self.pos[0] +TILE_BORDER_SIZE, self.pos[1]+TILE_BORDER_SIZE)
         if self.player:
-            pygame.draw.rect(screen, self.player.color, (*topleft, TILE_BODY_SIZE, TILE_BODY_SIZE))
-            screen.blit(self.player.image, self.player.base)
-            self.label.set_text(str(self.soldiers) if self.soldiers > 0 else "")
-            self.label.draw(screen)
-        
+            self._draw_player_tile(screen, topleft)
         else:
-            pygame.draw.rect(screen, "#DCDCDC", (*topleft, TILE_BODY_SIZE, TILE_BODY_SIZE))
+            self._draw_non_player_tile(screen, topleft)
+
+
+class Outpost(Tile, Sprite_Object):
+    def __init__(self, image, pos, soldiers):
+        Tile.__init__(self, pos, soldiers)
+        Sprite_Object.__init__(self, image, pos)
+        self.default_tile_color = "#808080"
+
+
+    def _draw_player_tile(self, screen, topleft):
+        pygame.draw.rect(screen, self.player.color, (*topleft, TILE_BODY_SIZE, TILE_BODY_SIZE))
+        screen.blit(self.image, self.rect)
+        self.label.set_text(str(self.soldiers) if self.soldiers > 0 else "")
+        self.label.draw(screen)
+
+    def _draw_non_player_tile(self, screen, topleft):
+        pygame.draw.rect(screen, self.default_tile_color, (*topleft, TILE_BODY_SIZE, TILE_BODY_SIZE))
+        screen.blit(self.image, self.rect)
+        self.label.set_text(str(self.soldiers) if self.soldiers > 0 else "")
+        self.label.draw(screen)
 
 
 
-class Outpost(Tile):
-    def __init__(self, pos):
-        super().__init__(pos)
+
+
 
     
     

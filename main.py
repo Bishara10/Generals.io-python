@@ -22,6 +22,12 @@ mountain_sprite = pygame.image.load("assets/images/mountain.png").convert_alpha(
 mountain_sprite = pygame.transform.scale(mountain_sprite, (TILE_SIZE, TILE_SIZE))
 base_sprite = pygame.image.load("assets/images/crown.png").convert_alpha()
 base_sprite = pygame.transform.scale(base_sprite, (TILE_SIZE, TILE_SIZE))
+outpost_sprite = pygame.image.load("assets/images/outpost.png").convert_alpha()
+outpost_sprite = pygame.transform.scale(outpost_sprite, (TILE_SIZE, TILE_SIZE))
+
+
+positions = set()
+available_tiles = {}
 
 
 # Mountains
@@ -31,10 +37,13 @@ for _ in range(70):
     pos = get_random_location()
 
     if pos not in mountains_positions:
-        mountains_positions.add(pos)
-        mountains_sprites.add(Mountain(mountain_sprite, pos))
-
-
+        make_outpost_chance = randint(1, 20)
+        if make_outpost_chance < 3:
+            available_tiles[pos] = Outpost(outpost_sprite, pos, randint(40, 50))
+            available_tiles[pos].draw(screen)
+        else:   
+            mountains_positions.add(pos)
+            mountains_sprites.add(Mountain(mountain_sprite, pos))
 
 
 # Available positions are all tiles in the grid that are not mountains.
@@ -42,10 +51,8 @@ available_positions = set([(x//TILE_SIZE * TILE_SIZE, y // TILE_SIZE * TILE_SIZE
                            for x in range(0, SCREEN_WIDTH, TILE_SIZE) 
                            for y in range(0, SCREEN_HEIGHT, 20)]) - mountains_positions
 
-positions = set()
-available_tiles = {}
 for pos in available_positions:
-    available_tiles[pos] = Tile(pos)
+    available_tiles[pos] = available_tiles.get(pos, Tile(pos))
 
 
 def draw_tiles(positions: iter):
@@ -150,7 +157,7 @@ def main():
         
         
         if current_time - last_regenerate_time > cooldown_regenerate:
-            available_tiles[player1.base].soldiers += 1
+            player1.regenerate_bases()
             last_regenerate_time = current_time
         
         if current_time - last_regenerate_all_time > cooldown_regenerate_all:
@@ -159,7 +166,7 @@ def main():
 
             last_regenerate_all_time = current_time
     
-        draw_tiles([player1.base])
+        draw_tiles([*player1.outposts.keys(), player1.base])
         draw_grid()
         highlight_tile(curr_chosen_tile_pos)
 
