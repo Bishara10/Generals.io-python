@@ -19,11 +19,8 @@ inputs = {pygame.K_UP: (0, -TILE_SIZE),
 
 # Load sprites
 mountain_sprite = pygame.image.load("assets/images/mountain.png").convert_alpha()
-mountain_sprite = pygame.transform.scale(mountain_sprite, (TILE_SIZE, TILE_SIZE))
 base_sprite = pygame.image.load("assets/images/crown.png").convert_alpha()
-base_sprite = pygame.transform.scale(base_sprite, (TILE_SIZE, TILE_SIZE))
 outpost_sprite = pygame.image.load("assets/images/outpost.png").convert_alpha()
-outpost_sprite = pygame.transform.scale(outpost_sprite, (TILE_SIZE, TILE_SIZE))
 
 
 positions = set()

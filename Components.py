@@ -2,13 +2,14 @@ import pygame
 from constants import *
 
 pygame.font.init()
-def_font = pygame.font.Font('./assets/fonts/Quicksand-Light.ttf', 20)
+def_font = pygame.font.Font('./assets/fonts/Quicksand-Medium.ttf', 20)
 
 class Sprite_Object(pygame.sprite.Sprite):
     def __init__(self, image: pygame.image, pos):
         super().__init__()
         self.image = image
-        self.rect = self.image.get_rect(topleft=pos)
+        image_pos = (pos[0] + TILE_SIZE // 2, pos[1] + TILE_SIZE // 2)
+        self.rect = self.image.get_rect(center=image_pos)
 
 
 class Label(pygame.sprite.Sprite):
@@ -111,10 +112,12 @@ class Player(Sprite_Object):
 class Mountain(Sprite_Object):
     def __init__(self, image: pygame.image, pos):
         super().__init__(image, pos)
+        self.pos = pos
         
 
     def draw(self, surface):
-        pygame.draw.rect(surface, "#BBBBBB", (*self.rect.topleft, TILE_SIZE, TILE_SIZE))
+        topleft = (self.pos[0] +TILE_BORDER_SIZE, self.pos[1]+TILE_BORDER_SIZE)
+        pygame.draw.rect(surface, "#BBBBBB", (*topleft, TILE_SIZE, TILE_SIZE))
         surface.blit(self.image, self.rect)
 
 
@@ -143,7 +146,7 @@ class Tile():
 
     def _draw_player_tile(self, screen, topleft):
         pygame.draw.rect(screen, self.player.color, (*topleft, TILE_BODY_SIZE, TILE_BODY_SIZE))
-        screen.blit(self.player.image, self.player.base)
+        screen.blit(self.player.image, self.player.rect)
         self.label.set_text(str(self.soldiers) if self.soldiers > 0 else "")
         self.label.draw(screen)
 
